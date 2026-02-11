@@ -107,7 +107,7 @@ Router::with_path("<**path>")
 * **Q: I get a 404 when refreshing the dashboard page.**
   * **A:** Ensure `with_fallback("public/index.html")` is correctly set in your Salvo router. This ensures the server redirects unknown paths to the Svelte entry point.
 * **Q: HTTP/3 is not working in the browser.**
-  * **A:** HTTP/3 requires a valid HTTPS connection. Ensure your firewall allows **UDP** traffic on port 443, not just TCP. (For me this is Just for Mobile App)
+  * **A:** HTTP/3 requires a valid HTTPS connection. Ensure your firewall allows **UDP** traffic on port 443, not just TCP. (For me this is Just for Mobile App).In this architecture, HTTP/3 (QUIC) is optimized specifically for the Mobile App client to ensure stable API performance over unstable networks. Browsers will automatically fall back to standard HTTPS (TCP) if UDP port 443 is blocked or if the browser's QUIC implementation differs.
 * **Q: Svelte changes are not reflecting.**
   * **A:** You must run `npm run build` inside the `frontend` folder for changes to be moved into the Salvo `public` directory.
 
