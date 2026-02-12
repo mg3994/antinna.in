@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PostgreSQL Database",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "backend",
+      "Username": "postgres",
+      "Password": "root",
+      "SSLMode": "prefer",
+      "Comment": "Auto-configured PostgreSQL server with pgvector and PostGIS"
+    }
+  }
+}
