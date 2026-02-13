@@ -1,4 +1,4 @@
-use rinja::Template;
+use askama::Template;
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -19,13 +19,22 @@ pub struct UserListFragTemplate {}
 
 #[handler]
 pub async fn list_page(req: &mut Request, res: &mut Response) -> AppResult<()> {
-    let is_fragment = req.headers().get("X-Fragment-Header");
-    if let Some(cookie) = res.cookies().get("jwt_token") {
-        let token = cookie.value().to_string();
-        if !jwt::decode_token(&token) {
-            res.render(Redirect::other("/login"));
+
+    // 1. Extract and Validate the token from ALL sources
+    let jwt_token = utils::extract_jwt_token_manually(req).await;
+    // If token is missing OR invalid/expired, redirect to login immediately
+    if jwt_token.is_none() || !jwt::is_jwt_token_valid(&jwt_token.unwrap()) {
+        // For HTMX/Fragments, you might want to send a 401 or a special header
+        if req.headers().contains_key("hx-request") {
+            res.headers_mut().insert("HX-Redirect", "/login".parse().unwrap());
         }
+        res.render(Redirect::other("/login"));
+        return Ok(()); // Early return is crucial here
     }
+    // 2. Handle Fragment vs Page rendering
+    let is_fragment = req.headers().get("X-Fragment-Header");
+
+
     match is_fragment {
         Some(_) => {
             let hello_tmpl = UserListFragTemplate {};
@@ -140,9 +149,10 @@ pub struct UserListResponse {
 }
 
 #[endpoint(tags("users"))]
-pub async fn list_users(query: &mut Request) -> JsonResult<UserListResponse> {
+pub async fn list_users(query: &mut Request,depot: &mut Depot // 1. Add this parameter
+                        ) -> JsonResult<UserListResponse> {
     let conn = db::pool();
-    let query: UserListQuery = query.extract().await?;
+    let query: UserListQuery = query.extract(depot).await?;
     let username_filter = query.username.clone().unwrap_or_default();
     let like_pattern = format!("%{}%", username_filter);
     let offset = (query.current_page - 1) * query.page_size;

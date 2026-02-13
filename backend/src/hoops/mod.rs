@@ -1,11 +1,13 @@
-use rinja::Template;
+use askama::Template;
 use salvo::http::ResBody;
 use salvo::prelude::*;
 
 pub mod custom_middleware_example;
 pub mod jwt;
-pub use jwt::auth_hoop;
+pub use auth::auth_hoop;
 mod cors;
+mod auth;
+
 pub use cors::cors_hoop;
 
 #[derive(Template)]

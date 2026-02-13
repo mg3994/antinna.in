@@ -1,11 +1,10 @@
 use anyhow::Result;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, EncodingKey, Validation};
-use salvo::jwt_auth::{ConstDecoder, CookieFinder, HeaderFinder, QueryFinder};
-use salvo::prelude::*;
+
 use serde::{Deserialize, Serialize};
 use time::{Duration, OffsetDateTime};
 
-use crate::config::{self, JwtConfig};
+use crate::config;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtClaims {
@@ -13,19 +12,9 @@ pub struct JwtClaims {
     exp: i64,
 }
 
-pub fn auth_hoop(config: &JwtConfig) -> JwtAuth<JwtClaims, ConstDecoder> {
-    JwtAuth::new(ConstDecoder::from_secret(
-        config.secret.to_owned().as_bytes(),
-    ))
-    .finders(vec![
-        Box::new(HeaderFinder::new()),
-        Box::new(QueryFinder::new("token")),
-        Box::new(CookieFinder::new("jwt_token")),
-    ])
-    .force_passed(false)
-}
 
-pub fn get_token(uid: impl Into<String>) -> Result<(String, i64)> {
+
+pub fn generate_jwt_token(uid: impl Into<String>) -> Result<(String, i64)> {
     let exp = OffsetDateTime::now_utc() + Duration::seconds(config::get().jwt.expiry);
     let claim = JwtClaims {
         uid: uid.into(),
@@ -40,7 +29,7 @@ pub fn get_token(uid: impl Into<String>) -> Result<(String, i64)> {
 }
 
 #[allow(dead_code)]
-pub fn decode_token(token: &str) -> bool {
+pub fn is_jwt_token_valid(token: &str) -> bool {
     let validation = Validation::new(Algorithm::HS256);
     decode::<JwtClaims>(
         token,

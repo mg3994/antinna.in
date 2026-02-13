@@ -10,3 +10,7 @@ expiry = 3600
 [log]
 file_name = "app.log"
 rolling = "daily"
+# added by Manish  (below), also prefer stf::fs there to load those in main
+[tls]
+cert = "certs/cert.pem"
+key = "certs/key.pem"

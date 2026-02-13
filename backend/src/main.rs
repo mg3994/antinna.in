@@ -31,6 +31,7 @@ pub fn empty_ok() -> JsonResult<Empty> {
 
 #[tokio::main]
 async fn main() {
+    rustls::crypto::ring::default_provider().install_default().expect("Failed to install rustls crypto provider");
     crate::config::init();
     let config = crate::config::get();
     crate::db::init(&config.db).await;
@@ -42,18 +43,24 @@ async fn main() {
         .catcher(Catcher::default().hoop(hoops::error_404))
         .hoop(hoops::cors_hoop());
     println!("🔄 listen on {}", &config.listen_addr);
+    println!("Debug: TLS config is {:?}", config.tls); // Add this
     //Acme support, automatically get TLS certificate from Let's Encrypt. For example, see https://github.com/salvo-rs/salvo/blob/main/examples/acme-http01-quinn/src/main.rs
     if let Some(tls) = &config.tls {
         let listen_addr = &config.listen_addr;
         println!(
-            "📖 Open API Page: https://{}/scalar",
+            "📖 Open API Page (test Quinn): https://{}/scalar",
             listen_addr.replace("0.0.0.0", "127.0.0.1")
         );
         println!(
-            "🔑 Login Page: https://{}/login",
+            "🔑 Login Page (test Quinn) : https://{}/login",
             listen_addr.replace("0.0.0.0", "127.0.0.1")
         );
-        let config = RustlsConfig::new(Keycert::new().cert(std::fs::read(tls.cert.clone()).expect("cert file not found")).key((std::fs::read(tls.key.clone()).expect("key file not found")));
+        let config = RustlsConfig::new(
+            Keycert::new().cert(
+                std::fs::read(tls.cert.clone()).expect("cert file not found")
+            ).key(
+                std::fs::read(tls.key.clone()).expect("key file not found")
+            ));
         let acceptor = QuinnListener::new(config.clone().build_quinn_config().unwrap(),listen_addr).join(TcpListener::new(listen_addr).rustls(config)).bind().await;
         let server = Server::new(acceptor);
         tokio::spawn(shutdown_signal(server.handle()));

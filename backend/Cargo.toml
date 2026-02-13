@@ -10,7 +10,7 @@ anyhow = "1"
 figment = { version = "0.10", features = ["env", "toml"] }
 jsonwebtoken = {version = "10", features = ["rust_crypto"]}
 rust-embed = "8"
-salvo = {version = "0.84", features = ["anyhow", "cookie", "cors", "jwt-auth", "oapi", "serve-static", "rustls", "logging", "test","quinn"]}
+salvo = {version = "0.89.1", features = ["anyhow", "cookie", "cors", "jwt-auth", "oapi", "serve-static", "rustls", "logging", "test","quinn"]}
 serde = "1"
 thiserror = "2"
 time = "0.3"
@@ -24,5 +24,7 @@ dotenvy = "0.15"
 tracing-appender ="0.2"
 tracing-subscriber = {version = "0.3", features = ["std", "fmt", "env-filter", "tracing-log", "time", "local-time", "json"]}
 sqlx = { version = "0.8", features = ["runtime-tokio", "macros", "postgres"]}
-rinja = "0.3"
-rand = "0.9"
+askama = "0.15.4"
+rand = "0.10.0"
+# that version is must for rustls
+rustls = { version = "0.23", features = ["ring"] }

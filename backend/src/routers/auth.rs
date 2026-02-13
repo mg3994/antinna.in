@@ -1,5 +1,5 @@
 use cookie::Cookie;
-use rinja::Template;
+use askama::Template;
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -9,14 +9,15 @@ use crate::models::User;
 use crate::{db, json_ok, utils, AppResult, JsonResult};
 
 #[handler]
-pub async fn login_page(res: &mut Response) -> AppResult<()> {
+pub async fn login_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
     #[derive(Template)]
     #[template(path = "login.html")]
     struct LoginTemplate {}
-    if let Some(cookie) = res.cookies().get("jwt_token") {
-        let token = cookie.value().to_string();
-        if jwt::decode_token(&token) {
-            res.render(Redirect::other("/users"));
+    // 1. Extract token using your universal finders (Header, Query, Cookies)
+    if let Some(jwt_token) = utils::extract_jwt_token_manually(req).await { // check even from headers adn query
+        // 2. Validate the token (checks signature + expiration)
+        if jwt::is_jwt_token_valid(&jwt_token) {
+            res.render(Redirect::other("/users")); //
             return Ok(());
         }
     }
@@ -71,7 +72,7 @@ pub async fn post_login(
             .into());
     }
 
-    let (token, exp) = jwt::get_token(&id)?;
+    let (token, exp) = jwt::generate_jwt_token(&id)?;
     let odata = LoginOutData {
         id,
         username,
@@ -81,7 +82,13 @@ pub async fn post_login(
     let cookie = Cookie::build(("jwt_token", odata.token.clone()))
         .path("/")
         .http_only(true)
+        // If is_secure_context() is true, browser only sends over HTTPS.
+        // If false (local dev), browser allows plain HTTP.
+        .secure(utils::is_secure_context())
         .build();
     res.add_cookie(cookie);
     json_ok(odata)
 }
+
+
+
