@@ -26,9 +26,9 @@ pub async fn list_page(req: &mut Request, res: &mut Response) -> AppResult<()> {
     if jwt_token.is_none() || !jwt::is_jwt_token_valid(&jwt_token.unwrap()) {
         // For HTMX/Fragments, you might want to send a 401 or a special header
         if req.headers().contains_key("hx-request") {
-            res.headers_mut().insert("HX-Redirect", "/login".parse().unwrap());
+            res.headers_mut().insert("HX-Redirect", "/auth".parse().unwrap());
         }
-        res.render(Redirect::other("/login"));
+        res.render(Redirect::other("/auth"));
         return Ok(()); // Early return is crucial here
     }
     // 2. Handle Fragment vs Page rendering
@@ -149,10 +149,9 @@ pub struct UserListResponse {
 }
 
 #[endpoint(tags("users"))]
-pub async fn list_users(query: &mut Request,depot: &mut Depot // 1. Add this parameter
-                        ) -> JsonResult<UserListResponse> {
+pub async fn list_users(req: &mut Request) -> JsonResult<UserListResponse> {
     let conn = db::pool();
-    let query: UserListQuery = query.extract(depot).await?;
+    let query: UserListQuery = req.parse_queries::<UserListQuery>()?; // issue here  as we can't use depot
     let username_filter = query.username.clone().unwrap_or_default();
     let like_pattern = format!("%{}%", username_filter);
     let offset = (query.current_page - 1) * query.page_size;

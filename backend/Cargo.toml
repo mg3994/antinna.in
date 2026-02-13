@@ -28,3 +28,4 @@ askama = "0.15.4"
 rand = "0.10.0"
 # that version is must for rustls
 rustls = { version = "0.23", features = ["ring"] }
+firebase-admin-sdk = {version = "0.2.4", features = ["auth","messaging"] } #Trait `Debug` is not implemented for `FirebaseApp` [E0277]

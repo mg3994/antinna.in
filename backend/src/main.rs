@@ -14,6 +14,8 @@ mod routers;
 mod utils;
 
 mod error;
+mod firebase;
+
 pub use error::AppError;
 
 pub type AppResult<T> = Result<T, AppError>;
@@ -36,6 +38,13 @@ async fn main() {
     let config = crate::config::get();
     crate::db::init(&config.db).await;
 
+    // Firebase Admin
+    if let Some(firebase_admin) = &config.firebase.admin {
+        crate::firebase::init(firebase_admin).await;
+    }
+    // firebase::firebase_admin().auth()
+    // firebase::firebase_admin().messaging()
+
     let _guard = config.log.guard();
     tracing::info!("log level: {}", &config.log.filter_level);
 
@@ -52,7 +61,7 @@ async fn main() {
             listen_addr.replace("0.0.0.0", "127.0.0.1")
         );
         println!(
-            "🔑 Login Page (test Quinn) : https://{}/login",
+            "🔑 Auth Page (test Quinn) : https://{}/auth",
             listen_addr.replace("0.0.0.0", "127.0.0.1")
         );
         let config = RustlsConfig::new(

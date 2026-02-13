@@ -14,3 +14,24 @@ rolling = "daily"
 [tls]
 cert = "certs/cert.pem"
 key = "certs/key.pem"
+
+# ==================================
+# Firebase Admin (Backend)
+# ==================================
+[firebase.admin]
+service_account_path = "secrets/firebase.json"
+
+# ==================================
+# Firebase Web (SSR / Frontend)
+# ==================================
+[firebase.web]
+api_key = "AIzaSyAUtirDdNPTmQz0Ze4lZ_r6du48HdpJIxQ"
+auth_domain = "rotiride.firebaseapp.com"
+project_id = "rotiride"
+
+storage_bucket = "rotiride.firebasestorage.app"
+messaging_sender_id = "318526800636"
+
+
+app_id = "1:318526800636:web:3388facad20b50c3abcd79"
+vapid_public_key = "BBTLbkWFNt9SrLZf7QcOt8vzZ4QtrIrb4LMJJHV4wqYTJvbsnW5JNjYkmyL6YtMf30UK3Q6IJdbKOM_rdRqEY64"

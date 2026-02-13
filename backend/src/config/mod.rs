@@ -7,7 +7,12 @@ use serde::Deserialize;
 mod log_config;
 pub use log_config::LogConfig;
 mod db_config;
+mod firebase_admin_config;
+mod firebase_web_config;
+
 pub use db_config::DbConfig;
+pub(crate) use crate::config::firebase_admin_config::FirebaseAdminConfig;
+use crate::config::firebase_web_config::FirebaseWebConfig;
 
 pub static CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 
@@ -49,6 +54,9 @@ pub struct ServerConfig {
     pub log: LogConfig,
     pub jwt: JwtConfig,
     pub tls: Option<TlsConfig>,
+
+    pub firebase: FirebaseConfig,
+
 }
 
 #[derive(Deserialize, Clone, Debug)]
@@ -60,6 +68,12 @@ pub struct JwtConfig {
 pub struct TlsConfig {
     pub cert: String,
     pub key: String,
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct FirebaseConfig {
+    pub admin: Option<FirebaseAdminConfig>,
+    pub web: Option<FirebaseWebConfig>,
 }
 
 #[allow(dead_code)]

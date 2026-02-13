@@ -19,7 +19,7 @@ pub fn root() -> Router {
     let router = Router::new()
         .hoop(Logger::new())
         .get(demo::hello)
-        .push(Router::with_path("login").get(auth::login_page))
+        .push(Router::with_path("auth").get(auth::auth_page))
         .push(Router::with_path("users").get(user::list_page))
         .push(
             Router::with_path("api")

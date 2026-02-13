@@ -9,9 +9,9 @@ use crate::models::User;
 use crate::{db, json_ok, utils, AppResult, JsonResult};
 
 #[handler]
-pub async fn login_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
+pub async fn auth_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
     #[derive(Template)]
-    #[template(path = "login.html")]
+    #[template(path = "auth.html")]
     struct LoginTemplate {}
     // 1. Extract token using your universal finders (Header, Query, Cookies)
     if let Some(jwt_token) = utils::extract_jwt_token_manually(req).await { // check even from headers adn query
