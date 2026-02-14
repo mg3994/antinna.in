@@ -1,10 +1,18 @@
 -- 1. Ensure the Enum exists with Firebase-style naming (except emailLink)
-DO $$ BEGIN
-CREATE TYPE auth_provider AS ENUM ('password', 'email_link', 'google.com', 'apple.com', 'phone');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
+CREATE TABLE IF NOT EXISTS provider_types (
+ slug TEXT PRIMARY KEY, -- 'google.com', 'apple.com', 'password'
+ name TEXT NOT NULL,    -- 'Google', 'Apple', 'Email/Password'
+ is_active BOOLEAN DEFAULT true
+);
 
+-- Seed the table with Firebase-standard slugs
+INSERT INTO provider_types (slug, name) VALUES
+ ('password', 'Email/Password'),
+ ('email_link', 'Email Link'),
+ ('google.com', 'Google'),
+ ('apple.com', 'Apple'),
+ ('phone', 'Phone Number')
+    ON CONFLICT DO NOTHING;
 -- A single user actually has two different types of UIDs.
 --
 -- The Local UID (The "Sub"): This is the one you see in the Firebase Console. It represents the person.
@@ -12,8 +20,9 @@ END $$;
 -- The Provider UID: This is the ID from the source (e.g., the specific ID Google or Apple assigned to them).
 
 CREATE TABLE IF NOT EXISTS  auth_identities (
-    user_id       UUID REFERENCES users(id) ON DELETE CASCADE,
-    provider      auth_provider NOT NULL,
+    user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    -- Foreign Key to our lookup table
+    provider      TEXT NOT NULL REFERENCES provider_types(slug),
     provider_uid  VARCHAR(255) NOT NULL,
     identifier    VARCHAR(255),
     verified_at   TIMESTAMP WITH TIME ZONE,
