@@ -1,1 +1,15 @@
 Hello {{ name }} from salvo
+
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try {
+                // Register the dynamic route you created in Salvo
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                console.log('Service Worker registered with scope:', registration.scope);
+            } catch (err) {
+                console.error('Service Worker registration failed:', err);
+            }
+        });
+    }
+</script>

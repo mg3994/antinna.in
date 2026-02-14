@@ -22,3 +22,44 @@ You have chosen sqlite database, the database has been initialized in the data f
 
 # About Salvo
 You can view the salvo documentation and more examples at https://salvo.rs/ 📖. If our tools have helped you, please star [salvo](https://github.com/salvo-rs/salvo) and [salvo-cli](https://github.com/salvo-rs/salvo-cli), which will greatly encourage us. ❤️
+
+# help kind stuff
+
+### Fix: Service Worker SSL Error on Localhost
+```
+Service Worker registration failed: SecurityError
+An SSL certificate error occurred when fetching the script.
+```
+
+## ❌ Problem
+
+When registering a Service Worker on:
+`f12 --> Console`
+
+
+Chrome requires a **valid HTTPS certificate** to register Service Workers.  
+Self-signed or invalid certificates will cause registration to fail.
+
+---
+
+# ✅ Quick Development Fix (Windows)
+
+Launch Chrome with special flags to bypass SSL validation.
+
+```powershell
+"C:\Program Files\Google\Chrome\Application\chrome.exe" ^
+--ignore-certificate-errors ^
+--unsafely-treat-insecure-origin-as-secure=https://127.0.0.1:8008 ^
+--user-data-dir=C:\tmp_chrome
+```
+==> it will open new chrome App instance , test your same endpoint there
+⚠ Important:
+If you use 127.0.0.1 in the browser, use the same in the flag.
+Do not mix localhost and 127.0.0.1
+
+let consider you are testing service worker with https (secure mode is on endpoint) <foor example localhost:8008> ,
+it will not accept the service worker fil for navigator 
+to accept ==>
+```powershell
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8008 --user-data-dir=C:\tmp_chrome
+```

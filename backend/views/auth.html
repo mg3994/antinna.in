@@ -5,6 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Salvo Demo</title>
+    {% if firebase_web_script.is_some() %}
+    {{ firebase_web_script.as_ref().unwrap()|safe }}
+    {% endif %}
   </head>
   <body id="body" class="bg-gradient-to-br from-blue-400 via-teal-400 to-green-500 min-h-screen">
     <div x-data="loginForm()">

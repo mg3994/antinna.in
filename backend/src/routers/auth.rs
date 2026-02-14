@@ -5,14 +5,16 @@ use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use crate::hoops::jwt;
-use crate::models::User;
-use crate::{db, json_ok, utils, AppResult, JsonResult};
+use crate::models::{FirebaseFeatures, User};
+use crate::{db, firebase, json_ok, utils, AppResult, JsonResult};
 
 #[handler]
 pub async fn auth_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
     #[derive(Template)]
     #[template(path = "auth.html")]
-    struct LoginTemplate {}
+    struct AuthTemplate {
+        firebase_web_script: Option<String>, // Add this field
+    }
     // 1. Extract token using your universal finders (Header, Query, Cookies)
     if let Some(jwt_token) = utils::extract_jwt_token_manually(req).await { // check even from headers adn query
         // 2. Validate the token (checks signature + expiration)
@@ -21,7 +23,12 @@ pub async fn auth_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
             return Ok(());
         }
     }
-    let hello_tmpl = LoginTemplate {};
+    // 2. Inject Firebase Script
+    // Assuming csr_script() is accessible here
+    let script = Some(firebase::csr_script(FirebaseFeatures{auth:true, messaging: false }));
+    let hello_tmpl = AuthTemplate {
+        firebase_web_script: script
+    };
     res.render(Text::Html(hello_tmpl.render().unwrap()));
     Ok(())
 }

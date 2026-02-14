@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS provider_types (
 -- Seed the table with Firebase-standard slugs
 INSERT INTO provider_types (slug, name) VALUES
  ('password', 'Email/Password'),
- ('email_link', 'Email Link'),
+ ('email_link', 'Email Link'), --emailLink
  ('google.com', 'Google'),
  ('apple.com', 'Apple'),
  ('phone', 'Phone Number')

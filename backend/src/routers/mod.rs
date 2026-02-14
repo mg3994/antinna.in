@@ -7,6 +7,7 @@ mod demo;
 mod user;
 
 use crate::{config, hoops};
+use crate::firebase::firebase_sw_handler;
 
 #[derive(RustEmbed)]
 #[folder = "assets"]
@@ -37,6 +38,8 @@ pub fn root() -> Router {
                 ),
         )
         .push(Router::with_path("favicon.ico").get(favicon))
+        // Dynamic Service Worker
+        .push(Router::with_path("firebase-messaging-sw.js").get(firebase_sw_handler))
         .push(Router::with_path("assets/{**rest}").get(static_embed::<Assets>()));
     let doc = OpenApi::new("salvo web api", "0.0.1").merge_router(&router);
     router

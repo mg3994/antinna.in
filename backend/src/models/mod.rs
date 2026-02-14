@@ -20,3 +20,20 @@ pub struct SafeUser {
     pub id: Uuid,
     pub username: String,
 }
+
+
+
+
+
+
+//
+pub struct FirebaseFeatures {
+    pub auth: bool,
+    pub messaging: bool,
+}
+
+impl Default for FirebaseFeatures {
+    fn default() -> Self {
+        Self { auth: true, messaging: true } // Both by default
+    }
+}

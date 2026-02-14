@@ -12,7 +12,7 @@ mod firebase_web_config;
 
 pub use db_config::DbConfig;
 pub(crate) use crate::config::firebase_admin_config::FirebaseAdminConfig;
-use crate::config::firebase_web_config::FirebaseWebConfig;
+pub(crate) use crate::config::firebase_web_config::FirebaseWebConfig;
 
 pub static CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 
