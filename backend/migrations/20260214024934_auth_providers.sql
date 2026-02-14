@@ -12,20 +12,18 @@ END $$;
 -- The Provider UID: This is the ID from the source (e.g., the specific ID Google or Apple assigned to them).
 
 CREATE TABLE IF NOT EXISTS  auth_identities (
-      id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      provider auth_provider NOT NULL,
-    -- This is the 'uid' from the original provider not firebase as ==>'sub' or 'uid' from the Firebase decoded token
-      provider_uid VARCHAR(255) NOT NULL,
-    -- The human-readable identifier (the actual email or phone number)
-      identifier VARCHAR(255),
-    -- Better than BOOLEAN: NULL = Not Verified, Date = Verified at...
-      verified_at TIMESTAMP WITH TIME ZONE, -- will be Null till we don't make it , useful in case of email/password , <= send email and verify kind stuff
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-   -- Constraints (Commas added, these were missing)
-      UNIQUE(user_id, provider),
-      UNIQUE(provider, provider_uid)
+    user_id       UUID REFERENCES users(id) ON DELETE CASCADE,
+    provider      auth_provider NOT NULL,
+    provider_uid  VARCHAR(255) NOT NULL,
+    identifier    VARCHAR(255),
+    verified_at   TIMESTAMP WITH TIME ZONE,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+   -- This replaces the 'id' column entirely
+    PRIMARY KEY (provider, provider_uid),
+
+    -- Ensures a user doesn't link the same provider twice (e.g., two Google accounts)
+    CONSTRAINT uni_user_provider UNIQUE(user_id, provider)
 );
 -- 3. Dedicated Trigger for auto-updating updated_at
 -- Using a unique name for this table's trigger
