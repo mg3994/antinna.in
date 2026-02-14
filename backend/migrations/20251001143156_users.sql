@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS users
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_users_firebase_uid ON users(firebase_uid);
+
 -- 2. Unique Username Table
 -- Enforces: One user = One username, and every username is unique.
 CREATE TABLE IF NOT EXISTS usernames (

@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS  auth_identities (
       user_id UUID REFERENCES users(id) ON DELETE CASCADE,
       provider auth_provider NOT NULL,
     -- This is the 'uid' from the original provider not firebase as ==>'sub' or 'uid' from the Firebase decoded token
-      provider_uid VARCHAR(255) NOT NULL, -- this is kind ==> if google then ==> email and stuffs, if email==> then xx@gmail.com , if phone then +918888888888
+      provider_uid VARCHAR(255) NOT NULL,
     -- The human-readable identifier (the actual email or phone number)
       identifier VARCHAR(255),
     -- Better than BOOLEAN: NULL = Not Verified, Date = Verified at...
-      verified_at TIMESTAMP WITH TIME ZONE,
+      verified_at TIMESTAMP WITH TIME ZONE, -- will be Null till we don't make it , useful in case of email/password , <= send email and verify kind stuff
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
    -- Constraints (Commas added, these were missing)
