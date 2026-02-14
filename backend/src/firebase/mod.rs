@@ -41,8 +41,8 @@ pub fn firebase_admin() -> &'static FirebaseApp {
 
 //
 // Provides SSR injection of Firebase Web config and auto-initialization script.
-///! Generate Firebase Web config script for SSR injection, including automatic `initializeApp()`.
-pub fn ssr_script() -> String {
+///! Generate Firebase Web config script for CSR injection, including automatic `initializeApp()`.
+pub fn csr_script() -> String {
     let web = config::get()
         .firebase
         .web

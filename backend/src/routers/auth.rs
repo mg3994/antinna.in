@@ -3,7 +3,7 @@ use askama::Template;
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
-
+use uuid::Uuid;
 use crate::hoops::jwt;
 use crate::models::User;
 use crate::{db, json_ok, utils, AppResult, JsonResult};
@@ -33,7 +33,7 @@ pub struct LoginInData {
 }
 #[derive(Serialize, ToSchema, Default, Debug)]
 pub struct LoginOutData {
-    pub id: String,
+    pub id: Uuid,
     pub username: String,
     pub token: String,
     pub exp: i64,
@@ -72,7 +72,7 @@ pub async fn post_login(
             .into());
     }
 
-    let (token, exp) = jwt::generate_jwt_token(&id)?;
+    let (token, exp) = jwt::generate_jwt_token(id)?;
     let odata = LoginOutData {
         id,
         username,

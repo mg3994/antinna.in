@@ -2,7 +2,8 @@ use askama::Template;
 use salvo::oapi::extract::*;
 use salvo::prelude::*;
 use serde::{Deserialize, Serialize};
-use ulid::Ulid;
+use uuid::Uuid;
+// use ulid::Ulid;
 use validator::Validate;
 use crate::hoops::jwt;
 
@@ -58,7 +59,10 @@ pub struct CreateInData {
 #[endpoint(tags("users"))]
 pub async fn create_user(idata: JsonBody<CreateInData>) -> JsonResult<SafeUser> {
     let CreateInData { username, password } = idata.into_inner();
-    let id = Ulid::new().to_string();
+    // let id = Ulid::new().to_string();
+    // Generate a proper Uuid instead of a Ulid string
+    // now_v7() automatically gets the time from your system
+    let id = Uuid::now_v7();
     let password = utils::hash_password(&password)?;
     let conn = db::pool();
     let _ = sqlx::query!(
@@ -85,7 +89,7 @@ struct UpdateInData {
 }
 #[endpoint(tags("users"), parameters(("user_id", description = "user id")))]
 pub async fn update_user(
-    user_id: PathParam<String>,
+    user_id: PathParam<Uuid>,
     idata: JsonBody<UpdateInData>,
 ) -> JsonResult<SafeUser> {
     let user_id = user_id.into_inner();
@@ -112,7 +116,7 @@ pub async fn update_user(
 }
 
 #[endpoint(tags("users"))]
-pub async fn delete_user(user_id: PathParam<String>) -> EmptyResult {
+pub async fn delete_user(user_id: PathParam<Uuid>) -> EmptyResult {
     let user_id = user_id.into_inner();
     let conn = db::pool();
     sqlx::query!(
