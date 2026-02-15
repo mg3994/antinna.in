@@ -8,7 +8,7 @@ use crate::config;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtClaims {
-    uid: String,
+    pub(crate) uid: String,
     exp: i64,
 }
 

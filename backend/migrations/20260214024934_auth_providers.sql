@@ -42,3 +42,17 @@ CREATE TRIGGER trg_auth_identities_updated_at
     BEFORE UPDATE ON auth_identities
     FOR EACH ROW
     EXECUTE FUNCTION set_updated_at();
+
+
+-- 1. Enable Row Level Security
+ALTER TABLE auth_identities ENABLE ROW LEVEL SECURITY;
+
+-- 2. Create the Policy
+-- This ensures that for any SELECT, UPDATE, or DELETE,
+-- the user_id in the row must match the UUID we set in the session.
+CREATE POLICY auth_identities_owner_policy ON auth_identities
+    USING (user_id = current_setting('app.current_user_id')::uuid)
+    WITH CHECK (user_id = current_setting('app.current_user_id')::uuid);
+
+-- Note: 'WITH CHECK' prevents a user from trying to INSERT or UPDATE
+-- a row to belong to a different user_id.
