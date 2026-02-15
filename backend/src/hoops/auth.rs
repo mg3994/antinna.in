@@ -104,5 +104,5 @@ pub fn auth_db_rls_hoop(config: &JwtConfig) -> DbRlsMiddleware { //<- modify thi
 
         .force_passed(false);
 
-    DbRlsMiddleware { autsh }
+    DbRlsMiddleware { auth}
 }
