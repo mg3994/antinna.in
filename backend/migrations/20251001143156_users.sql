@@ -79,16 +79,25 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE usernames ENABLE ROW LEVEL SECURITY;
 
--- [READ] Public: Anyone can see profiles where deleted_at is NULL
+-- CREATE VIEW public_profiles AS
+-- SELECT
+--     id,
+--     display_name,
+--     avatar_url
+-- FROM users
+-- WHERE deleted_at IS NULL;
+
+-- [READ] Public: Anyone can see profiles (TODO: a better logic in future , where a some a  user having provide some specific services can even access even with deleted_At is not Null all other type be with where deleted_at is NULL
 CREATE POLICY users_select_public ON users
     FOR SELECT
-    USING (deleted_at IS NULL);
+    USING (true); --(deleted_at IS NULL); // let decide it by roles column if role has that much bit then only we will allow
 
 -- [UPDATE] Private: Only the owner can change their bio/avatar
 -- We use NULLIF to prevent errors if the session variable isn't set yet
 CREATE POLICY users_update_owner ON users
     FOR UPDATE
-    USING (id = NULLIF(current_setting('app.current_user_id', true), '')::uuid)
+    USING (id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
+    AND deleted_at IS NULL )
     WITH CHECK (id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
 
 

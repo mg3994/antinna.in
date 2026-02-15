@@ -30,7 +30,7 @@ impl DbRlsMiddleware {
         // If force_passed(false) was used in auth_hoop, it might have already stopped the flow.
         if depot.jwt_auth_state() != JwtAuthState::Authorized {
             res.status_code(StatusCode::UNAUTHORIZED);
-            res.render("Unauthorized"); // <- doesn't exist yet , TODO ; this
+            res.render("Unauthorized"); // <- yet , TODO ; this
             ctrl.skip_rest();
             return;
         }
