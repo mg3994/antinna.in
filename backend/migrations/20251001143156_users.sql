@@ -1,3 +1,14 @@
+CREATE TYPE gender_enum AS ENUM (
+    'male',
+    'female',
+    'non_binary',
+    'transgender',
+    'intersex',
+    'prefer_not_to_say',
+    'other'
+    );
+
+
 -- A single user actually has two different types of UIDs.
 --
 -- The Local UID (The "Sub"): This is the one you see in the Firebase Console. It represents the person.
@@ -12,16 +23,26 @@ CREATE TABLE IF NOT EXISTS users
 (
     -- Unique internal ID, strictly NOT NULL
     id UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
-    firebase_uid VARCHAR(128)  NOT NULL UNIQUE,
+    firebase_uid TEXT  NOT NULL UNIQUE,
+
     display_name VARCHAR(100),
     bio TEXT,
     avatar_url TEXT,
+    gender gender_enum,     -- nullable enum
+    dob DATE,               -- date of birth
+
+
+    embedding_dirty BOOLEAN DEFAULT TRUE,
+
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_firebase_uid ON users(firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_users_active
+    ON users(id)
+    WHERE deleted_at IS NULL;
 
 -- 2. Unique Username Table
 -- Enforces: One user = One username, and every username is unique.
@@ -30,31 +51,80 @@ CREATE TABLE IF NOT EXISTS usernames (
     user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
 
     -- UNIQUE constraint ensures no two users share the same handle.
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username CITEXT NOT NULL UNIQUE,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-    -- 1. Constraint to force lowercase and no spaces
-    CONSTRAINT username_is_lowercase
-        CHECK (username = LOWER(TRIM(username)) AND username !~ '\s'),
+    -- 1. THE POLICY CONSTRAINT (Replaces your individual checks)
+    CONSTRAINT username_policy CHECK (
+        -- Length: 3 to 30 chars
+        -- Regex: Must start with a letter, then can have letters, numbers, or single underscores.
+        -- This automatically handles: lowercase, no spaces, and no weird symbols.
+        username::text ~ '^[a-z][a-z0-9_]{2,29}$'
 
-    -- Basic validation to prevent empty or tiny usernames
-    CONSTRAINT username_min_length CHECK (char_length(username) >= 3)
+            -- Prevent "ugly" handles like 'john__doe'
+            AND username::text !~ '__'
+
+            -- Ensure it doesn't end with an underscore (looks better in URLs)
+            AND username::text !~ '_$'
+        ),
+
+    -- 2. RESERVED WORDS (Crucial for Marketplace security)
+    CONSTRAINT username_not_reserved CHECK (
+        username::text NOT IN (
+            'admin', 'support', 'official', 'system', 'root',
+            'help', 'marketplace', 'billing', 'api', 'mentors'
+            )
+        )
 );
+
+
+-- This allows: SELECT * FROM usernames WHERE username % 'Zhan San'; (The % operator is fuzzy match)
+-- Fast fuzzy suggestions
+CREATE INDEX idx_usernames_trgm
+    ON usernames USING gin (username gin_trgm_ops);
+
+-- Fast prefix search
+CREATE INDEX idx_username_prefix
+    ON usernames (username text_pattern_ops);
+
+CREATE TABLE IF NOT EXISTS user_profile_embeddings
+(
+    user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+
+    embedding VECTOR(1536) NOT NULL,
+
+    model_name VARCHAR(50),
+
+    embedding_source TEXT, -- <- will make enum soon
+    version INT DEFAULT 1,
+
+    generated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_profile_embeddings_vector
+    ON user_profile_embeddings
+USING ivfflat (embedding vector_cosine_ops);
 
 -- 3.1. Drop if
 DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
 DROP TRIGGER IF EXISTS trg_usernames_updated_at ON usernames;
 DROP TRIGGER IF EXISTS trg_lock_firebase_uid ON users;
 DROP TRIGGER IF EXISTS trg_enforce_soft_delete ON users;
--- 3.2. Attach Trigger
+DROP TRIGGER IF EXISTS trg_mark_embedding_dirty ON users;
+DROP TRIGGER IF EXISTS trg_embedding_versioning ON user_profile_embeddings;
 
-CREATE TRIGGER trg_users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
+DROP TRIGGER IF EXISTS trg_soft_delete_user_profile_embeddings ON user_profile_embeddings;
+-- 3.2. Attach Trigger
+-- no need of updated at embedding => trg_mark_embedding_dirty will handle that
+-- CREATE TRIGGER trg_users_updated_at
+--     BEFORE UPDATE ON users
+--     FOR EACH ROW
+--     EXECUTE FUNCTION set_updated_at();
 
 CREATE TRIGGER trg_usernames_updated_at
     BEFORE UPDATE ON usernames
@@ -71,6 +141,22 @@ CREATE TRIGGER trg_enforce_soft_delete
     BEFORE UPDATE ON users
     FOR EACH ROW
 EXECUTE FUNCTION enforce_soft_delete();
+
+CREATE TRIGGER trg_mark_embedding_dirty
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+EXECUTE FUNCTION mark_embedding_dirty();
+
+CREATE TRIGGER trg_embedding_versioning
+    BEFORE UPDATE ON user_profile_embeddings
+    FOR EACH ROW
+EXECUTE FUNCTION auto_increment_embedding_version();
+
+CREATE TRIGGER trg_soft_delete_user_profile_embeddings
+    BEFORE DELETE ON user_profile_embeddings
+    FOR EACH ROW
+EXECUTE FUNCTION soft_delete_user_profile_embeddings();
+
 
 -- ---
 -- 1. Users Table Policies

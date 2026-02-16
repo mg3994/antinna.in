@@ -20,6 +20,7 @@ CREATE TABLE service_categories (
 
 -- Contractor <-> Categories (Many-to-Many)
 CREATE TABLE contractor_categories (
+--     add id as uuid , as we need that for review and ratings
   contractor_id UUID NOT NULL REFERENCES contractors(id) ON DELETE CASCADE,
   category_id UUID NOT NULL REFERENCES service_categories(id) ON DELETE CASCADE,
   is_available BOOLEAN DEFAULT true, -- <- As we can tamperaly pause specific stuff for new request not old, (liek sometime due to not having enugh material to do that specific work)

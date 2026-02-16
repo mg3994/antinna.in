@@ -36,3 +36,56 @@ END IF;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION mark_embedding_dirty()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Always update timestamp
+  NEW.updated_at = CURRENT_TIMESTAMP;
+
+  -- Mark embedding stale if profile-relevant fields changed
+  IF NEW.display_name IS DISTINCT FROM OLD.display_name
+     OR NEW.bio IS DISTINCT FROM OLD.bio
+     OR NEW.gender IS DISTINCT FROM OLD.gender
+     OR NEW.dob IS DISTINCT FROM OLD.dob
+     OR NEW.avatar_url IS DISTINCT FROM OLD.avatar_url
+  THEN
+     NEW.embedding_dirty = TRUE;
+END IF;
+
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION auto_increment_embedding_version()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update timestamp automatically
+  NEW.updated_at = CURRENT_TIMESTAMP;
+
+  -- Increment version if embedding actually changed
+  IF NEW.embedding IS DISTINCT FROM OLD.embedding
+     OR NEW.model_name IS DISTINCT FROM OLD.model_name
+     THEN
+     NEW.version = OLD.version + 1;
+     NEW.generated_at = CURRENT_TIMESTAMP;
+END IF;
+
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION soft_delete_user_profile_embeddings()
+RETURNS trigger AS $$
+BEGIN
+UPDATE user_profile_embeddings
+SET deleted_at = CURRENT_TIMESTAMP
+WHERE user_id = OLD.user_id;
+
+RETURN NULL; -- cancel delete
+END;
+$$ LANGUAGE plpgsql;
