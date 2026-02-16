@@ -1,111 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Salvo Demo</title>
+    <title>Sign In | Salvo</title>
     {% if firebase_web_script.is_some() %}
     {{ firebase_web_script.as_ref().unwrap()|safe }}
     {% endif %}
-  </head>
-  <body id="body" class="bg-gradient-to-br from-blue-400 via-teal-400 to-green-500 min-h-screen">
-    <div x-data="loginForm()">
-        <div class="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-          <div class="w-full max-w-md space-y-6 bg-white bg-opacity-80 p-10 rounded-3xl shadow-xl border border-blue-200">
-            <div>
-              <h2 class="text-center text-4xl font-extrabold tracking-tight text-blue-900">
-                Login
-              </h2>
-              <p class="mt-2 text-center text-sm text-gray-600">
-                Salvo-Cli Generated, Please Read README.md
-              </p>
+    <script src="assets/js/tailwindcss.js" defer></script>
+    <script src="assets/js/sweetalert2.js" defer></script>
+    <script src="assets/js/alpinejs.js" defer></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); }
+        .disabled-btn { opacity: 0.5; cursor: not-allowed; pointer-events: none; filter: grayscale(1); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen flex items-center justify-center p-4">
+
+<div id="recaptcha-container"></div>
+
+<div x-data="authForm()" x-cloak class="w-full max-w-md">
+    <div class="glass p-8 rounded-3xl shadow-2xl space-y-6">
+
+        <div class="text-center">
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight">Sign In</h2>
+            <p class="text-xs text-gray-500 font-bold uppercase tracking-widest mt-2">Choose your method</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                <input x-model="email" type="email" :disabled="loading" placeholder="name@example.com"
+                       class="w-full p-4 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-100 outline-none transition-all shadow-sm disabled:bg-gray-100" />
             </div>
-            <form class="mt-8 space-y-6" @submit.prevent="submit">
-              <input type="hidden" name="remember" value="true" />
-              <div class="space-y-4">
-                <div>
-                  <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                  <input
-                    x-model="username"
-                    id="username"
-                    name="username"
-                    type="text"
-                    autocomplete="username"
-                    required
-                    class="block w-full appearance-none rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-300 sm:text-sm transition"
-                    placeholder="Username"
-                  />
-                </div>
-                <div>
-                  <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                  <input
-                    x-model="password"
-                    id="password"
-                    name="password"
-                    type="password"
-                    autocomplete="current-password"
-                    required
-                    class="block w-full appearance-none rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-300 sm:text-sm transition"
-                    placeholder="Password"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                >
-                  Login
+
+            {% for p in providers %}
+            {% if p.slug == "password" %}
+            <button @click="handleEmailLink" :class="{ 'disabled-btn': loading }"
+                    class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition active:scale-[0.98] shadow-lg shadow-blue-200">
+                <span x-show="!loading">Email Magic Link</span>
+                <span x-show="loading">Sending...</span>
+            </button>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="space-y-3">
+            <div class="relative py-2">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-100"></div></div>
+                <div class="relative flex justify-center text-[10px] uppercase font-bold text-gray-400"><span class="bg-white px-2">Secure Options</span></div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                {% for p in providers %}
+                {% if p.slug != "password" && p.slug != "email_link" %}
+
+                <button @click="loginDispatcher('{{ p.slug }}')"
+                        :class="{ 'disabled-btn': loading }"
+                        class="flex items-center justify-center p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition shadow-sm">
+
+                    {% if p.slug == "google.com" %}
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5 mr-2">
+                    {% elif p.slug == "phone" %}
+                    <span class="mr-2 text-lg">📱</span>
+                    {% endif %}
+
+                    <span class="text-sm font-bold">Continue with {{ p.name }}</span>
                 </button>
-              </div>
-            </form>
-            <div class="text-center text-xs text-gray-500 mt-6">
-              <p>Account: zhangsan</p>
-              <p>Password: 123</p>
+
+                {% endif %}
+                {% endfor %}
             </div>
-          </div>
         </div>
     </div>
-  </body>
-  <script src="assets/js/tailwindcss.js" defer></script>
-  <script src="assets/js/sweetalert2.js" defer></script>
-  <script src="assets/js/alpinejs.js" defer></script>
-  <script>
-    function loginForm() {
-      return {
-        username: "",
-        password: "",
-        userList: "",
-        async submit() {
-          try {
-            const response = await fetch("/api/login", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "accept": "application/json",
-              },
-              body: JSON.stringify({
-                username: this.username,
-                password: this.password,
-              }),
-            });
-            if (!response.ok) {
-              const data = await response.json();
-              throw new Error(`${data.error.brief}`);
+</div>
+
+<script>
+    function authForm() {
+        return {
+            email: "",
+            loading: false,
+            recaptchaVerifier: null,
+
+            // Global Dispatcher
+            async loginDispatcher(slug) {
+                if (slug === 'phone') {
+                    await this.handlePhoneAuth();
+                } else {
+                    await this.submitSocial(slug);
+                }
+            },
+
+            // --- EMAIL LINK LOGIC ---
+            async handleEmailLink() {
+                if (!this.email) return Swal.fire("Required", "Email is needed for magic links", "info");
+                this.loading = true;
+                try {
+                    const settings = { url: window.location.origin + '/auth/verify-link', handleCodeInApp: true };
+                    await window.fbAuth.sendSignInLinkToEmail(this.email, settings);
+                    window.localStorage.setItem('emailForSignIn', this.email);
+                    Swal.fire("Check Email", "We sent a login link to your inbox!", "success");
+                } catch (e) { Swal.fire("Error", e.message, "error"); }
+                finally { this.loading = false; }
+            },
+
+            // --- PHONE AUTH LOGIC ---
+            async handlePhoneAuth() {
+                this.loading = true;
+                try {
+                    // Initialize Recaptcha (Required for Phone Auth)
+                    if (!this.recaptchaVerifier) {
+                        this.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
+                    }
+
+                    // 1. Get Phone Number via Modal
+                    const { value: phoneNumber } = await Swal.fire({
+                        title: 'Phone Login',
+                        html: `
+                            <div class="flex flex-col gap-4">
+                                <div class="flex gap-2">
+                                    <select id="swal-country" class="border p-3 rounded-xl bg-gray-50 text-sm font-bold border-gray-200">
+                                        <option value="+91">🇮🇳 +91</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                    </select>
+                                    <input id="swal-phone" type="tel" class="border p-3 rounded-xl flex-grow outline-none focus:ring-2 focus:ring-blue-400 border-gray-200" placeholder="9876543210">
+                                </div>
+                            </div>`,
+                        confirmButtonText: 'Send Verification Code',
+                        showCancelButton: true,
+                        confirmButtonColor: '#2563eb',
+                        preConfirm: () => {
+                            const code = document.getElementById('swal-country').value;
+                            const num = document.getElementById('swal-phone').value;
+                            if (!num) return Swal.showValidationMessage('Valid number required');
+                            return code + num;
+                        }
+                    });
+
+                    if (!phoneNumber) return;
+
+                    // 2. Trigger Firebase SMS
+                    const confirmationResult = await window.fbAuth.signInWithPhoneNumber(phoneNumber, this.recaptchaVerifier);
+
+                    // 3. Get OTP via Modal
+                    const { value: otp } = await Swal.fire({
+                        title: 'Verify Code',
+                        input: 'text',
+                        inputLabel: 'Enter the 6-digit SMS code',
+                        inputPlaceholder: '123456',
+                        confirmButtonText: 'Login Now',
+                        confirmButtonColor: '#2563eb',
+                        showCancelButton: true,
+                    });
+
+                    if (otp) {
+                        const result = await confirmationResult.confirm(otp);
+                        await this.callBackendAuth(await result.user.getIdToken());
+                    }
+                } catch (e) {
+                    console.error("Phone Auth Failure:", e);
+                    Swal.fire("Phone Error", e.message, "error");
+                } finally { this.loading = false; }
+            },
+
+            // --- SOCIAL LOGIN LOGIC ---
+            async submitSocial(slug) {
+                this.loading = true;
+                try {
+                    let provider;
+                    if (slug === 'google.com') provider = new firebase.auth.GoogleAuthProvider();
+                    else if (slug === 'apple.com') provider = new firebase.auth.OAuthProvider('apple.com');
+
+                    const res = await window.fbAuth.signInWithPopup(provider);
+                    await this.callBackendAuth(await res.user.getIdToken());
+                } catch (e) { Swal.fire("Login Error", e.message, "error"); }
+                finally { this.loading = false; }
+            },
+
+            // --- BACKEND VERIFICATION ---
+            async callBackendAuth(idToken) {
+                const response = await fetch("/api/authenticate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_token: idToken }),
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    window.location.href = result.data?.username ? "/users" : "/setup-profile";
+                } else {
+                    Swal.fire("Backend Sync Failed", result.error?.brief || "Verify logic failed", "error");
+                }
             }
-            window.location.href = "/users";
-          } catch (error) {
-            Swal.fire({
-              title: "Error!",
-              text: error.message,
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          }
-        },
-      };
+        };
     }
-  </script>
+</script>
+</body>
 </html>

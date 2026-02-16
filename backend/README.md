@@ -68,3 +68,19 @@ to accept ==>
 --
 docker compose down --rmi all
 --
+
+DROP TABLE IF EXISTS _sqlx_migrations;
+-- 1. Drop existing application tables
+DROP TABLE IF EXISTS "auth_identities" CASCADE;
+DROP TABLE IF EXISTS "usernames" CASCADE;
+DROP TABLE IF EXISTS "user_profile_embeddings" CASCADE;
+DROP TABLE IF EXISTS "users" CASCADE;
+DROP TABLE IF EXISTS "provider_types" CASCADE;
+DROP TABLE IF EXISTS "test_data" CASCADE;
+DROP TABLE IF EXISTS "contractor_categories" CASCADE;
+DROP TABLE IF EXISTS "contractors" CASCADE;
+DROP TABLE IF EXISTS "service_categories" CASCADE;
+DROP TABLE IF EXISTS "vendor_types" CASCADE;
+
+-- 2. Drop the custom types so we can recreate them fresh
+DROP TYPE IF EXISTS gender_enum CASCADE;

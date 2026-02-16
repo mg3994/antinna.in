@@ -20,22 +20,30 @@ pub fn root() -> Router {
     let router = Router::new()
         .hoop(Logger::new())
         .get(demo::hello)
-        .push(Router::with_path("auth").get(auth::auth_page))
-        .push(Router::with_path("users").get(user::list_page))
         .push(
+            Router::with_path("auth").get(auth::auth_page)// New landing page for the email link
+            .push(Router::with_path("verify-link").get(auth::verify_link_page))
+        )
+
+        // /aut is already here
+        // todo: /auth/verify-link?apiKey=AIzaSyAUtirDdNPTmQz0Ze4lZ_r6du48HdpJIxQ&oobCode=bzT1-JzH-neckfVOzFVeGT9J_At3Yz8c0EfqcNWG4kIAAAGcZdU-qw&mode=signIn&lang=en
+        // so that email link for firebase can work properly
+        // .push(Router::with_path("users").get(user::list_page))
+        .push(
+
             Router::with_path("api")
-                .push(Router::with_path("login").post(auth::post_login))
-                .push(
-                    Router::with_path("users")
-                        .hoop(hoops::auth_hoop(&config::get().jwt))
-                        .get(user::list_users)
-                        .post(user::create_user)
-                        .push(
-                            Router::with_path("{user_id}")
-                                .put(user::update_user)
-                                .delete(user::delete_user),
-                        ),
-                ),
+                .push(Router::with_path("authenticate").post(auth::post_authenticate))
+                // .push(
+                //     Router::with_path("users")
+                //         .hoop(hoops::auth_hoop(&config::get().jwt))
+                //         .get(user::list_users)
+                //         .post(user::create_user)
+                //         .push(
+                //             Router::with_path("{user_id}")
+                //                 .put(user::update_user)
+                //                 .delete(user::delete_user),
+                //         ),
+                // ),
         )
         .push(Router::with_path("favicon.ico").get(favicon))
         // Dynamic Service Worker

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verifying Login...</title>
+    {% if firebase_web_script.is_some() %}
+    {{ firebase_web_script.as_ref().unwrap()|safe }}
+    {% endif %}
+    <script src="/assets/js/tailwindcss.js" defer></script>
+    <script src="/assets/js/sweetalert2.js" defer></script>
+    <script src="/assets/js/alpinejs.js" defer></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+<div x-data="verifyHandler()" x-init="completeLogin()" class="text-center p-8 bg-white rounded-2xl shadow-xl max-w-sm w-full">
+    <div x-show="processing">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <h2 class="text-xl font-bold text-gray-800">Finalizing Login</h2>
+        <p class="text-sm text-gray-500 mt-2">Verifying your secure link...</p>
+    </div>
+</div>
+
+<script>
+    function verifyHandler() {
+        return {
+            processing: true,
+            async completeLogin() {
+                try {
+                    // 1. Check if the URL is a valid sign-in link
+                    if (window.fbAuth.isSignInWithEmailLink(window.location.href)) {
+                        // sorry to say i am on different browser now and  this will not work ==> let email = window.localStorage.getItem('emailForSignIn');
+                        // 2. Get the email from local storage
+                        let email = window.localStorage.getItem('emailForSignIn');
+
+                        // 3. If missing (e.g. user opened link on different device), ask for it
+                        if (!email) {
+                            const { value: enteredEmail } = await Swal.fire({
+                                title: 'Confirm Email',
+                                input: 'email',
+                                inputLabel: 'Please enter your email to confirm',
+                                inputPlaceholder: 'name@example.com',
+                                allowOutsideClick: false
+                            });
+                            email = enteredEmail;
+                        }
+
+                        // 4. Finalize sign-in with Firebase
+                        const result = await window.fbAuth.signInWithEmailLink(email, window.location.href);
+
+                        // 5. Clear the storage
+                        window.localStorage.removeItem('emailForSignIn');
+
+                        // 6. Get ID Token and send to your Salvo Backend
+                        const idToken = await result.user.getIdToken();
+                        await this.callBackendAuth(idToken);
+                    } else {
+                        throw new Error("Invalid or expired login link.");
+                    }
+                } catch (err) {
+                    Swal.fire("Link Error", err.message, "error").then(() => {
+                        window.location.href = "/auth";
+                    });
+                }
+            },
+
+            async callBackendAuth(idToken) {
+                const response = await fetch("/api/authenticate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id_token: idToken }),
+                });
+
+                const result = await response.json();
+                console.log("Backend response:", result);
+
+                if (response.ok) {
+                    window.location.href = "/users";
+                } else {
+                    throw new Error(result.error?.brief || "Verification failed");
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

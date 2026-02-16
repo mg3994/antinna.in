@@ -19,33 +19,29 @@ CREATE TABLE service_categories (
 
 
 -- Contractor <-> Categories (Many-to-Many)
+-- Contractor <-> Categories (Many-to-Many)
 CREATE TABLE contractor_categories (
---     add id as uuid , as we need that for review and ratings
-  contractor_id UUID NOT NULL REFERENCES contractors(id) ON DELETE CASCADE,
-  category_id UUID NOT NULL REFERENCES service_categories(id) ON DELETE CASCADE,
-  is_available BOOLEAN DEFAULT true, -- <- As we can tamperaly pause specific stuff for new request not old, (liek sometime due to not having enugh material to do that specific work)
-  is_verified BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
-  PRIMARY KEY (contractor_id, category_id)
+    -- Added ID as requested for easier review/rating references
+                                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+                                       contractor_id UUID NOT NULL REFERENCES contractors(id) ON DELETE CASCADE,
+                                       category_id UUID NOT NULL REFERENCES service_categories(id) ON DELETE CASCADE,
+
+                                       is_available BOOLEAN DEFAULT true,
+                                       is_verified BOOLEAN DEFAULT false,
+
+                                       created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                                       updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                                       deleted_at TIMESTAMPTZ DEFAULT NULL, -- Comma was missing here!
+
+    -- Since we added a dedicated 'id', we make the pair a UNIQUE constraint instead
+                                       CONSTRAINT uniq_contractor_category_pair UNIQUE (contractor_id, category_id)
 );
 
-CREATE INDEX idx_contractor_categories_category
-    ON contractor_categories(category_id);
-
-CREATE INDEX idx_contractor_categories_available
-    ON contractor_categories(is_available);
-
+-- Note: Your UNIQUE INDEX below handles the soft-delete logic perfectly
 CREATE UNIQUE INDEX uniq_active_contractor_category
     ON contractor_categories(contractor_id, category_id)
     WHERE deleted_at IS NULL;
-
-
-CREATE TABLE order_types (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(50) UNIQUE NOT NULL
-);
 
 CREATE TABLE vendor_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

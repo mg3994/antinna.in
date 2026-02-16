@@ -1,3 +1,4 @@
+DROP TYPE IF EXISTS gender_enum CASCADE;
 CREATE TYPE gender_enum AS ENUM (
     'male',
     'female',
@@ -83,11 +84,11 @@ CREATE TABLE IF NOT EXISTS usernames (
 
 -- This allows: SELECT * FROM usernames WHERE username % 'Zhan San'; (The % operator is fuzzy match)
 -- Fast fuzzy suggestions
-CREATE INDEX idx_usernames_trgm
+CREATE INDEX IF NOT EXISTS idx_usernames_trgm
     ON usernames USING gin (username gin_trgm_ops);
 
 -- Fast prefix search
-CREATE INDEX idx_username_prefix
+CREATE INDEX IF NOT EXISTS idx_username_prefix
     ON usernames (username text_pattern_ops);
 
 CREATE TABLE IF NOT EXISTS user_profile_embeddings
@@ -174,12 +175,14 @@ ALTER TABLE usernames ENABLE ROW LEVEL SECURITY;
 -- WHERE deleted_at IS NULL;
 
 -- [READ] Public: Anyone can see profiles (TODO: a better logic in future , where a some a  user having provide some specific services can even access even with deleted_At is not Null all other type be with where deleted_at is NULL
+DROP POLICY IF EXISTS users_select_public ON users;
 CREATE POLICY users_select_public ON users
     FOR SELECT
     USING (true); --(deleted_at IS NULL); // let decide it by roles column if role has that much bit then only we will allow
 
 -- [UPDATE] Private: Only the owner can change their bio/avatar
 -- We use NULLIF to prevent errors if the session variable isn't set yet
+DROP POLICY IF EXISTS users_update_owner ON users;
 CREATE POLICY users_update_owner ON users
     FOR UPDATE
     USING (id = NULLIF(current_setting('app.current_user_id', true), '')::uuid
@@ -196,16 +199,19 @@ CREATE POLICY users_update_owner ON users
 -- ---
 
 -- [READ] Public: Anyone can look up a username
+DROP POLICY IF EXISTS usernames_select_public ON usernames;
 CREATE POLICY usernames_select_public ON usernames
     FOR SELECT
     USING (true);
 
 -- [UPDATE] Private: Only the owner can change their specific username
+DROP POLICY IF EXISTS usernames_update_owner ON usernames;
 CREATE POLICY usernames_update_owner ON usernames
     FOR UPDATE
     USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid)
     WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
 
+DROP POLICY IF EXISTS users_delete_never ON users;
 CREATE POLICY users_delete_never
     ON users
     FOR DELETE
@@ -217,6 +223,7 @@ CREATE POLICY users_delete_never
 
 -- [INSERT] Private: A user can only create a username for THEMSELVES
 -- This is used if the user creates a profile first, then chooses a username later
+DROP POLICY IF EXISTS usernames_insert_owner ON usernames;
 CREATE POLICY usernames_insert_owner ON usernames
     FOR INSERT
     WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);

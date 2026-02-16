@@ -91,3 +91,23 @@ WHERE user_id = OLD.user_id
 RETURN NULL; -- cancel delete
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION handle_identity_verification()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- 1. If we are INSERTING and a value was provided, or if we are UPDATING
+    -- and trying to set verified_at for the first time:
+    IF (TG_OP = 'INSERT' AND NEW.verified_at IS NOT NULL) OR
+       (TG_OP = 'UPDATE' AND OLD.verified_at IS NULL AND NEW.verified_at IS NOT NULL) THEN
+        NEW.verified_at = CURRENT_TIMESTAMP;
+
+    -- 2. If verified_at was already set in the past, LOCK IT.
+    -- Prevent it from being changed or set back to NULL.
+    ELSIF TG_OP = 'UPDATE' AND OLD.verified_at IS NOT NULL THEN
+        NEW.verified_at = OLD.verified_at;
+END IF;
+
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

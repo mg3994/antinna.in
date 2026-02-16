@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS provider_types (
 
 -- Seed the table with Firebase-standard slugs
 INSERT INTO provider_types (slug, name) VALUES
- ('password', 'Email/Password'),
- ('email_link', 'Email Link'), --emailLink
+ ('password', 'Email Link'),
  ('google.com', 'Google'),
  ('apple.com', 'Apple'),
  ('phone', 'Phone Number')
@@ -37,22 +36,46 @@ CREATE TABLE IF NOT EXISTS  auth_identities (
 -- 3. Dedicated Trigger for auto-updating updated_at
 -- Using a unique name for this table's trigger
 DROP TRIGGER IF EXISTS trg_auth_identities_updated_at ON auth_identities;
+DROP TRIGGER IF EXISTS trg_handle_verification ON auth_identities;
 --
 CREATE TRIGGER trg_auth_identities_updated_at
     BEFORE UPDATE ON auth_identities
     FOR EACH ROW
     EXECUTE FUNCTION set_updated_at();
 
+CREATE TRIGGER trg_handle_verification
+    BEFORE INSERT OR UPDATE ON auth_identities
+    FOR EACH ROW
+EXECUTE FUNCTION handle_identity_verification();
 
--- 1. Enable Row Level Security
+-- 1. Enable RLS
 ALTER TABLE auth_identities ENABLE ROW LEVEL SECURITY;
 
--- 2. Create the Policy
--- This ensures that for any SELECT, UPDATE, or DELETE,
--- the user_id in the row must match the UUID we set in the session.
-CREATE POLICY auth_identities_owner_policy ON auth_identities
-    USING (user_id = current_setting('app.current_user_id')::uuid)
-    WITH CHECK (user_id = current_setting('app.current_user_id')::uuid);
+-- Clean up existing policies for auth_identities
+DROP POLICY IF EXISTS auth_identities_select_owner ON auth_identities;
+DROP POLICY IF EXISTS auth_identities_insert_owner ON auth_identities;
+DROP POLICY IF EXISTS auth_identities_update_owner ON auth_identities;
+DROP POLICY IF EXISTS auth_identities_delete_owner ON auth_identities;
 
--- Note: 'WITH CHECK' prevents a user from trying to INSERT or UPDATE
--- a row to belong to a different user_id.
+-- 2. SELECT: "I can see my own linked accounts"
+CREATE POLICY auth_identities_select_owner ON auth_identities
+    FOR SELECT
+    USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+-- 3. INSERT: "I can link a new provider to my account"
+CREATE POLICY auth_identities_insert_owner ON auth_identities
+    FOR INSERT
+    WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+-- 4. UPDATE: "I can update my provider details (email, etc) but NOT the owner ID"
+CREATE POLICY auth_identities_update_owner ON auth_identities
+    FOR UPDATE
+    USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid)
+    WITH CHECK (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+-- 5. DELETE: "I can unlink a provider from my account"
+CREATE POLICY auth_identities_delete_owner ON auth_identities
+    FOR DELETE
+    USING (user_id = NULLIF(current_setting('app.current_user_id', true), '')::uuid);
+
+-- add triger for verified at and make sure once verfied at is set then avoid seting up verified_At again
