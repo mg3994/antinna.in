@@ -80,11 +80,13 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION soft_delete_user_profile_embeddings()
-RETURNS trigger AS $$
+  RETURNS trigger AS $$
 BEGIN
-UPDATE user_profile_embeddings
-SET deleted_at = CURRENT_TIMESTAMP
-WHERE user_id = OLD.user_id;
+ UPDATE user_profile_embeddings
+ SET deleted_at = CURRENT_TIMESTAMP
+WHERE user_id = OLD.user_id
+  AND deleted_at IS NULL; -- Only update if not already soft-deleted
+
 
 RETURN NULL; -- cancel delete
 END;

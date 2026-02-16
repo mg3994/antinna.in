@@ -63,3 +63,8 @@ to accept ==>
 ```powershell
 "C:\Program Files\Google\Chrome\Application\chrome.exe" --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8008 --user-data-dir=C:\tmp_chrome
 ```
+
+
+--
+docker compose down --rmi all
+--
