@@ -58,6 +58,7 @@ pub struct FullUserRecord {
     pub id: Uuid,
     pub firebase_uid: String,
     pub display_name: Option<String>,
+    pub username: Option<String>, // Added from usernames table
     pub bio: Option<String>,
     pub avatar_url: Option<String>,
     pub gender: Option<Gender>, // Your custom Enum

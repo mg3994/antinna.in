@@ -111,3 +111,19 @@ END IF;
 RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION handle_session_revocation()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If the session is being updated and a 'revoke' signal is detected,
+    -- or if we just want to ensure revoked_at isn't manually set to a fake date.
+    IF NEW.revoked_at IS NOT NULL AND OLD.revoked_at IS NULL THEN
+        NEW.revoked_at = CURRENT_TIMESTAMP;
+END IF;
+
+    NEW.updated_at = CURRENT_TIMESTAMP;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
