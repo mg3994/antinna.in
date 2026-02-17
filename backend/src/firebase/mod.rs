@@ -7,6 +7,23 @@ use salvo::prelude::*;
 use crate::models::FirebaseFeatures;
 
 
+//
+// window.addEventListener("fb:token", async (e) => {
+// const token = e.detail.idToken;
+//
+// await fetch("/api/auth/refresh_session", {
+// method: "POST",
+// headers: { "Content-Type": "application/json" },
+// body: JSON.stringify({ id_token: token }),
+// });
+// });
+//
+// window.addEventListener("fb:logout", () => {
+// console.log("User logged out");
+// });
+
+
+
 
 // admin
 pub static FIREBASE_ADMIN: OnceLock<FirebaseApp> = OnceLock::new();
@@ -81,7 +98,37 @@ pub fn csr_script(features: FirebaseFeatures) -> String {
 
     if features.auth {
         scripts.push_str(r#"<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>"#);
-        init_logic.push_str("window.fbAuth = firebase.auth(app);\n");
+        init_logic.push_str(
+            r#"
+window.fbAuth = firebase.auth(app);
+
+// ---- Firebase auth lifecycle bridge ----
+let __lastFbToken = null;
+
+firebase.auth().onIdTokenChanged(async (user) => {
+    if (!user) {
+        window.dispatchEvent(new CustomEvent("fb:logout"));
+        return;
+    }
+
+    try {
+        const idToken = await user.getIdToken();
+
+        // prevent duplicate refresh calls
+        if (__lastFbToken === idToken) return;
+        __lastFbToken = idToken;
+
+        window.dispatchEvent(
+            new CustomEvent("fb:token", {
+                detail: { idToken }
+            })
+        );
+    } catch (err) {
+        console.error("Token refresh error:", err);
+    }
+});
+"#
+        );
     }
 
     if features.messaging {
