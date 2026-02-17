@@ -43,6 +43,9 @@
                             email = enteredEmail;
                         }
 
+                        // 2. Ensure Local Persistence is active before final sign-in
+                        await window.fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
                         // 4. Finalize sign-in with Firebase
                         const result = await window.fbAuth.signInWithEmailLink(email, window.location.href);
 

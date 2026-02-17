@@ -141,6 +141,10 @@
 
                     if (!phoneNumber) return;
 
+                    // 2. Ensure Local Persistence is active before final sign-in
+                    await window.fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+
                     // 2. Trigger Firebase SMS
                     const confirmationResult = await window.fbAuth.signInWithPhoneNumber(phoneNumber, this.recaptchaVerifier);
 
@@ -172,6 +176,8 @@
                     let provider;
                     if (slug === 'google.com') provider = new firebase.auth.GoogleAuthProvider();
                     else if (slug === 'apple.com') provider = new firebase.auth.OAuthProvider('apple.com');
+                    // 2. Ensure Local Persistence is active before final sign-in
+                    await window.fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
                     const res = await window.fbAuth.signInWithPopup(provider);
                     await this.callBackendAuth(await res.user.getIdToken());

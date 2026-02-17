@@ -27,7 +27,7 @@ pub async fn verify_link_page(req: &mut Request,res: &mut Response) -> AppResult
         }
     }
 
-    let script = Some(crate::firebase::csr_script(FirebaseFeatures { auth: true, messaging: false }));
+    let script = Some(crate::firebase::csr_script(FirebaseFeatures { auth: true, messaging: true }));
     let tmpl = VerifyTemplate { firebase_web_script: script };
 
     res.render(Text::Html(tmpl.render().unwrap()));
@@ -69,7 +69,7 @@ pub async fn auth_page(req: &mut Request,res: &mut Response) -> AppResult<()> {
         .await?;
     // 2. Inject Firebase Script
     // Assuming csr_script() is accessible here
-    let script = Some(firebase::csr_script(FirebaseFeatures{auth:true, messaging: false }));
+    let script = Some(firebase::csr_script(FirebaseFeatures{auth:true, messaging: true }));
     let hello_tmpl = AuthTemplate {
         firebase_web_script: script,
         providers,
