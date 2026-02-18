@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/db147f72-b0b9-4ceb-8122-32699b62c94f/console.sql" value="db147f72-b0b9-4ceb-8122-32699b62c94f" />
-    <file url="file://$PROJECT_DIR$/migrations/20251001143156_users.sql" value="db147f72-b0b9-4ceb-8122-32699b62c94f" />
-  </component>
-</project>

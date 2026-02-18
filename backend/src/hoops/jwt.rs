@@ -4,7 +4,7 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, EncodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
-use crate::config;
+use crate::infrastructure::config;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct JwtClaims {

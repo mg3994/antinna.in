@@ -1,0 +1,73 @@
+
+{
+  "errors": {
+    "internal_error": "Internal server error",
+    "not_found": "Resource not found",
+    "bad_request": "Bad request",
+    "validation_error": "Validation error",
+    "salvo_error": "Salvo internal error",
+    "unknown_error": "Unknown error occurred",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "conflict": "Resource conflict",
+    "database_error": "Database operation failed",
+    "network_error": "Network error occurred"
+  },
+  "auth": {
+    "login_success": "Login successful",
+    "login_failed": "Login failed",
+    "logout_success": "Logout successful",
+    "invalid_credentials": "Invalid email or password",
+    "email_already_exists": "Email already registered",
+    "account_locked": "Account is locked",
+    "session_expired": "Session has expired",
+    "token_invalid": "Invalid authentication token",
+    "token_expired": "Authentication token expired",
+    "password_too_weak": "Password is too weak",
+    "password_mismatch": "Passwords do not match",
+    "email_not_verified": "Email not verified"
+  },
+  "user": {
+    "user_created": "User created successfully",
+    "user_updated": "User updated successfully",
+    "user_deleted": "User deleted successfully",
+    "user_not_found": "User not found",
+    "profile_updated": "Profile updated successfully",
+    "invalid_user_id": "Invalid user ID",
+    "user_already_exists": "User already exists"
+  },
+  "validation": {
+    "required_field": "This field is required",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Invalid phone number",
+    "invalid_format": "Invalid format",
+    "min_length": "Minimum length is {min} characters",
+    "max_length": "Maximum length is {max} characters",
+    "invalid_value": "Invalid value"
+  },
+  "common": {
+    "success": "Operation successful",
+    "failed": "Operation failed",
+    "processing": "Processing...",
+    "please_wait": "Please wait",
+    "try_again": "Please try again",
+    "contact_support": "Please contact support",
+    "welcome": "Welcome",
+    "goodbye": "Goodbye"
+  },
+  "firebase": {
+    "initialization_failed": "Firebase initialization failed",
+    "auth_error": "Firebase authentication error",
+    "messaging_error": "Firebase messaging error",
+    "storage_error": "Firebase storage error"
+  },
+  "database": {
+    "connection_failed": "Database connection failed",
+    "query_failed": "Database query failed",
+    "transaction_failed": "Transaction failed",
+    "migration_failed": "Database migration failed"
+  }
+}
+
+
+

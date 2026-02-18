@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::default_false;
+use super::{default_false,default_db_pool_size,default_tcp_timeout,default_connection_timeout,default_statement_timeout,default_helper_threads};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct DbConfig {
@@ -39,18 +39,4 @@ pub struct DbConfig {
     pub enforce_tls: bool,
 }
 
-fn default_helper_threads() -> usize {
-    10
-}
-fn default_db_pool_size() -> u32 {
-    10
-}
-fn default_tcp_timeout() -> u64 {
-    10000
-}
-fn default_connection_timeout() -> u64 {
-    30000
-}
-fn default_statement_timeout() -> u64 {
-    30000
-}
+

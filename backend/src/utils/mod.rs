@@ -56,6 +56,6 @@ pub async fn extract_jwt_token_manually(req: &mut Request) -> Option<String> {
 }
 /// Returns true if the server is configured to use TLS (HTTPS/Quinn)
 pub fn is_secure_context() -> bool {
-    crate::config::get().tls.is_some()
+    crate::infrastructure::config::get().tls.is_some()
 }
 

@@ -2,7 +2,7 @@ use salvo::jwt_auth::{ConstDecoder, JwtAuth, JwtAuthState, JwtAuthDepotExt}; // 
 use salvo::prelude::*;
 // use sqlx::{Postgres, Transaction};
 
-use crate::config::JwtConfig;
+use crate::infrastructure::config::JwtConfig;
 use crate::hoops::jwt::JwtClaims;
 use crate::{db, utils};
 

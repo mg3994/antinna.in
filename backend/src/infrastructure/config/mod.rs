@@ -1,5 +1,4 @@
 use std::sync::OnceLock;
-
 use figment::Figment;
 use figment::providers::{Env, Format, Toml};
 use serde::Deserialize;
@@ -11,15 +10,15 @@ mod firebase_admin_config;
 mod firebase_web_config;
 
 pub use db_config::DbConfig;
-pub(crate) use crate::config::firebase_admin_config::FirebaseAdminConfig;
-pub(crate) use crate::config::firebase_web_config::FirebaseWebConfig;
+pub use crate::infrastructure::config::firebase_admin_config::FirebaseAdminConfig;
+pub use crate::infrastructure::config::firebase_web_config::FirebaseWebConfig;
 
-pub static CONFIG: OnceLock<ServerConfig> = OnceLock::new();
 
-pub fn init() {
+pub static CONFIG: OnceLock<crate::infrastructure::config::ServerConfig> = OnceLock::new();
+pub fn init()  {
     let raw_config = Figment::new()
         .merge(Toml::file(
-            Env::var("APP_CONFIG").as_deref().unwrap_or("config.toml"),
+            std::env::var("APP_CONFIG").as_deref().unwrap_or("config.toml"),
         ))
         .merge(Env::prefixed("APP_").global());
 
@@ -37,18 +36,25 @@ pub fn init() {
         eprintln!("DATABASE_URL is not set");
         std::process::exit(1);
     }
-    crate::config::CONFIG
+    crate::infrastructure::config::CONFIG
         .set(config)
         .expect("config should be set");
+
 }
-pub fn get() -> &'static ServerConfig {
-    CONFIG.get().expect("config should be set")
+
+pub fn get() -> &'static crate::infrastructure::config::ServerConfig {
+    crate::infrastructure::config::CONFIG.get().expect("config should be set")
 }
+
+
 
 #[derive(Deserialize, Clone, Debug)]
 pub struct ServerConfig {
     #[serde(default = "default_listen_addr")]
     pub listen_addr: String,
+
+    #[serde(default = "default_locale")]
+    pub default_locale: String,
 
     pub db: DbConfig,
     pub log: LogConfig,
@@ -88,3 +94,49 @@ pub fn default_true() -> bool {
 fn default_listen_addr() -> String {
     "127.0.0.1:8008".into()
 }
+
+
+fn default_locale() -> String {
+    "en".into()
+}
+
+//
+fn default_helper_threads() -> usize {
+    10
+}
+fn default_db_pool_size() -> u32 {
+    10
+}
+fn default_tcp_timeout() -> u64 {
+    10000
+}
+fn default_connection_timeout() -> u64 {
+    30000
+}
+fn default_statement_timeout() -> u64 {
+    30000
+}
+
+//
+fn default_filter_level() -> String {
+    "info".into()
+}
+fn default_directory() -> String {
+    "./logs".into()
+}
+fn default_file_name() -> String {
+    "app.log".into()
+}
+fn default_rolling() -> String {
+    "daily".into()
+}
+fn default_format() -> String {
+    FORMAT_FULL.into()
+}
+//
+
+
+pub const FORMAT_PRETTY: &str = "pretty";
+pub const FORMAT_COMPACT: &str = "compact";
+pub const FORMAT_JSON: &str = "json";
+pub const FORMAT_FULL: &str = "full";

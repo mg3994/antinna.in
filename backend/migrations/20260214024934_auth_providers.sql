@@ -1,7 +1,7 @@
 -- 1. Ensure the Enum exists with Firebase-style naming (except emailLink)
 CREATE TABLE IF NOT EXISTS provider_types (
  slug TEXT PRIMARY KEY, -- 'google.com', 'apple.com', 'password'
- name TEXT NOT NULL,    -- 'Google', 'Apple', 'Email/Password'
+ name TEXT NOT NULL,    -- 'Google', 'Apple', 'Email Magic Link'
  is_active BOOLEAN DEFAULT true
 );
 

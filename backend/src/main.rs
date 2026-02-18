@@ -5,38 +5,40 @@ use salvo::server::ServerHandle;
 use serde::Serialize;
 use tokio::signal;
 use tracing::info;
+use crate::infrastructure::i18n::init_i18n;
 
-mod config;
-mod db;
+// mod db;
 mod hoops;
 mod models;
 mod routers;
 mod utils;
 
-mod error;
+
+
 mod firebase;
 
-pub use error::AppError;
 
-pub type AppResult<T> = Result<T, AppError>;
-pub type JsonResult<T> = Result<Json<T>, AppError>;
-pub type EmptyResult = Result<Json<Empty>, AppError>;
 
-pub fn json_ok<T>(data: T) -> JsonResult<T> {
-    Ok(Json(data))
-}
-#[derive(Serialize, ToSchema, Clone, Copy, Debug)]
-pub struct Empty {}
-pub fn empty_ok() -> JsonResult<Empty> {
-    Ok(Json(Empty {}))
-}
+//
+mod application;
+mod core;
+mod infrastructure;
+mod interface;
+//
+use crate::core::errors::AppError;
+use crate::infrastructure::config::LogConfig;
+
 
 #[tokio::main]
 async fn main() {
     rustls::crypto::ring::default_provider().install_default().expect("Failed to install rustls crypto provider");
-    crate::config::init();
-    let config = crate::config::get();
-    crate::db::init(&config.db).await;
+    crate::infrastructure::config::init();
+    let config = crate::infrastructure::config::get();
+    init_i18n(config.default_locale);
+    crate::infrastructure::persistence::init(&config.db).await;
+
+    // locales init
+
 
     // Firebase Admin
     if let Some(firebase_admin) = &config.firebase.admin {
@@ -45,7 +47,7 @@ async fn main() {
     // firebase::firebase_admin().auth()
     // firebase::firebase_admin().messaging()
 
-    let _guard = config.log.guard();
+    let _guard = crate::infrastructure::log::init(&config.log); // todo change to init
     tracing::info!("log level: {}", &config.log.filter_level);
 
     let service = Service::new(routers::root())
@@ -120,7 +122,7 @@ mod tests {
     use salvo::prelude::*;
     use salvo::test::{ResponseExt, TestClient};
 
-    use crate::config;
+    use crate::infrastructure::config;
 
     #[tokio::test]
     async fn test_hello_world() {

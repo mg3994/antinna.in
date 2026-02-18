@@ -1,0 +1,69 @@
+{
+  "errors": {
+    "internal_error": "Error interno del servidor",
+    "not_found": "Recurso no encontrado",
+    "bad_request": "Solicitud incorrecta",
+    "validation_error": "Error de validación",
+    "salvo_error": "Error interno de Salvo",
+    "unknown_error": "Ocurrió un error desconocido",
+    "unauthorized": "Acceso no autorizado",
+    "forbidden": "Acceso prohibido",
+    "conflict": "Conflicto de recursos",
+    "database_error": "Operación de base de datos fallida",
+    "network_error": "Error de red"
+  },
+  "auth": {
+    "login_success": "Inicio de sesión exitoso",
+    "login_failed": "Inicio de sesión fallido",
+    "logout_success": "Cierre de sesión exitoso",
+    "invalid_credentials": "Correo electrónico o contraseña inválidos",
+    "email_already_exists": "Correo electrónico ya registrado",
+    "account_locked": "La cuenta está bloqueada",
+    "session_expired": "La sesión ha expirado",
+    "token_invalid": "Token de autenticación inválido",
+    "token_expired": "Token de autenticación expirado",
+    "password_too_weak": "La contraseña es demasiado débil",
+    "password_mismatch": "Las contraseñas no coinciden",
+    "email_not_verified": "Correo electrónico no verificado"
+  },
+  "user": {
+    "user_created": "Usuario creado exitosamente",
+    "user_updated": "Usuario actualizado exitosamente",
+    "user_deleted": "Usuario eliminado exitosamente",
+    "user_not_found": "Usuario no encontrado",
+    "profile_updated": "Perfil actualizado exitosamente",
+    "invalid_user_id": "ID de usuario inválido",
+    "user_already_exists": "El usuario ya existe"
+  },
+  "validation": {
+    "required_field": "Este campo es obligatorio",
+    "invalid_email": "Dirección de correo electrónico inválida",
+    "invalid_phone": "Número de teléfono inválido",
+    "invalid_format": "Formato inválido",
+    "min_length": "La longitud mínima es {min} caracteres",
+    "max_length": "La longitud máxima es {max} caracteres",
+    "invalid_value": "Valor inválido"
+  },
+  "common": {
+    "success": "Operación exitosa",
+    "failed": "Operación fallida",
+    "processing": "Procesando...",
+    "please_wait": "Por favor espere",
+    "try_again": "Por favor intente nuevamente",
+    "contact_support": "Por favor contacte al soporte",
+    "welcome": "Bienvenido",
+    "goodbye": "Adiós"
+  },
+  "firebase": {
+    "initialization_failed": "Falló la inicialización de Firebase",
+    "auth_error": "Error de autenticación de Firebase",
+    "messaging_error": "Error de mensajería de Firebase",
+    "storage_error": "Error de almacenamiento de Firebase"
+  },
+  "database": {
+    "connection_failed": "Falló la conexión a la base de datos",
+    "query_failed": "Falló la consulta de base de datos",
+    "transaction_failed": "Transacción fallida",
+    "migration_failed": "Falló la migración de base de datos"
+  }
+}

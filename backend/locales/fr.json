@@ -1,0 +1,69 @@
+{
+  "errors": {
+    "internal_error": "Erreur interne du serveur",
+    "not_found": "Ressource non trouvée",
+    "bad_request": "Mauvaise requête",
+    "validation_error": "Erreur de validation",
+    "salvo_error": "Erreur interne de Salvo",
+    "unknown_error": "Une erreur inconnue s'est produite",
+    "unauthorized": "Accès non autorisé",
+    "forbidden": "Accès interdit",
+    "conflict": "Conflit de ressources",
+    "database_error": "Échec de l'opération de base de données",
+    "network_error": "Erreur réseau"
+  },
+  "auth": {
+    "login_success": "Connexion réussie",
+    "login_failed": "Échec de la connexion",
+    "logout_success": "Déconnexion réussie",
+    "invalid_credentials": "Email ou mot de passe invalide",
+    "email_already_exists": "Email déjà enregistré",
+    "account_locked": "Le compte est verrouillé",
+    "session_expired": "La session a expiré",
+    "token_invalid": "Jeton d'authentification invalide",
+    "token_expired": "Jeton d'authentification expiré",
+    "password_too_weak": "Le mot de passe est trop faible",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "email_not_verified": "Email non vérifié"
+  },
+  "user": {
+    "user_created": "Utilisateur créé avec succès",
+    "user_updated": "Utilisateur mis à jour avec succès",
+    "user_deleted": "Utilisateur supprimé avec succès",
+    "user_not_found": "Utilisateur non trouvé",
+    "profile_updated": "Profil mis à jour avec succès",
+    "invalid_user_id": "ID utilisateur invalide",
+    "user_already_exists": "L'utilisateur existe déjà"
+  },
+  "validation": {
+    "required_field": "Ce champ est obligatoire",
+    "invalid_email": "Adresse email invalide",
+    "invalid_phone": "Numéro de téléphone invalide",
+    "invalid_format": "Format invalide",
+    "min_length": "La longueur minimale est de {min} caractères",
+    "max_length": "La longueur maximale est de {max} caractères",
+    "invalid_value": "Valeur invalide"
+  },
+  "common": {
+    "success": "Opération réussie",
+    "failed": "Opération échouée",
+    "processing": "Traitement en cours...",
+    "please_wait": "Veuillez patienter",
+    "try_again": "Veuillez réessayer",
+    "contact_support": "Veuillez contacter le support",
+    "welcome": "Bienvenue",
+    "goodbye": "Au revoir"
+  },
+  "firebase": {
+    "initialization_failed": "Échec de l'initialisation de Firebase",
+    "auth_error": "Erreur d'authentification Firebase",
+    "messaging_error": "Erreur de messagerie Firebase",
+    "storage_error": "Erreur de stockage Firebase"
+  },
+  "database": {
+    "connection_failed": "Échec de la connexion à la base de données",
+    "query_failed": "Échec de la requête de base de données",
+    "transaction_failed": "Transaction échouée",
+    "migration_failed": "Échec de la migration de base de données"
+  }
+}

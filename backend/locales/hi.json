@@ -1,0 +1,70 @@
+
+{
+  "errors": {
+    "internal_error": "आंतरिक सर्वर त्रुटि",
+    "not_found": "संसाधन नहीं मिला",
+    "bad_request": "खराब अनुरोध",
+    "validation_error": "सत्यापन त्रुटि",
+    "salvo_error": "साल्वो आंतरिक त्रुटि",
+    "unknown_error": "अज्ञात त्रुटि हुई",
+    "unauthorized": "अनधिकृत पहुंच",
+    "forbidden": "पहुंच निषिद्ध",
+    "conflict": "संसाधन विरोध",
+    "database_error": "डेटाबेस ऑपरेशन विफल रहा",
+    "network_error": "नेटवर्क त्रुटि हुई"
+  },
+  "auth": {
+    "login_success": "लॉगिन सफल",
+    "login_failed": "लॉगिन विफल",
+    "logout_success": "लॉगआउट सफल",
+    "invalid_credentials": "अमान्य ईमेल या पासवर्ड",
+    "email_already_exists": "ईमेल पहले से पंजीकृत है",
+    "account_locked": "खाता लॉक है",
+    "session_expired": "सत्र समाप्त हो गया है",
+    "token_invalid": "अमान्य प्रमाणीकरण टोकन",
+    "token_expired": "प्रमाणीकरण टोकन समाप्त हो गया",
+    "password_too_weak": "पासवर्ड बहुत कमजोर है",
+    "password_mismatch": "पासवर्ड मेल नहीं खाते",
+    "email_not_verified": "ईमेल सत्यापित नहीं है"
+  },
+  "user": {
+    "user_created": "उपयोगकर्ता सफलतापूर्वक बनाया गया",
+    "user_updated": "उपयोगकर्ता अपडेट किया गया",
+    "user_deleted": "उपयोगकर्ता हटाया गया",
+    "user_not_found": "उपयोगकर्ता नहीं मिला",
+    "profile_updated": "प्रोफ़ाइल अपडेट की गई",
+    "invalid_user_id": "अमान्य उपयोगकर्ता आईडी",
+    "user_already_exists": "उपयोगकर्ता पहले से मौजूद है"
+  },
+  "validation": {
+    "required_field": "यह फ़ील्ड आवश्यक है",
+    "invalid_email": "अमान्य ईमेल पता",
+    "invalid_phone": "अमान्य फोन नंबर",
+    "invalid_format": "अमान्य प्रारूप",
+    "min_length": "न्यूनतम लंबाई {min} वर्ण है",
+    "max_length": "अधिकतम लंबाई {max} वर्ण है",
+    "invalid_value": "अमान्य मान"
+  },
+  "common": {
+    "success": "ऑपरेशन सफल",
+    "failed": "ऑपरेशन विफल",
+    "processing": "प्रसंस्करण...",
+    "please_wait": "कृपया प्रतीक्षा करें",
+    "try_again": "कृपया पुनः प्रयास करें",
+    "contact_support": "कृपया सहायता से संपर्क करें",
+    "welcome": "स्वागत है",
+    "goodbye": "अलविदा"
+  },
+  "firebase": {
+    "initialization_failed": "फायरबेस आरंभीकरण विफल रहा",
+    "auth_error": "फायरबेस प्रमाणीकरण त्रुटि",
+    "messaging_error": "फायरबेस मैसेजिंग त्रुटि",
+    "storage_error": "फायरबेस स्टोरेज त्रुटि"
+  },
+  "database": {
+    "connection_failed": "डेटाबेस कनेक्शन विफल रहा",
+    "query_failed": "डेटाबेस क्वेरी विफल रही",
+    "transaction_failed": "लेन-देन विफल रहा",
+    "migration_failed": "डेटाबेस माइग्रेशन विफल रहा"
+  }
+}
